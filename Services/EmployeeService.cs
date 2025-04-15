@@ -145,7 +145,6 @@ namespace worksystem.Services
             if (existingEmployee == null)
                 throw new KeyNotFoundException($"Dolgozó a megadott {EmployeeId} ID számmal nem található.");
 
-            // Ellenőrizzük, hogy a régi teljes név megegyezik-e
             if (existingEmployee.FullName != employee.FullName)
                 throw new ArgumentException("A régi teljes név nem a megadott ID-hoz tartozik.");
 
@@ -174,11 +173,9 @@ namespace worksystem.Services
             if (existingEmployee == null)
                 throw new KeyNotFoundException($"Dolgozó a megadott {EmployeeId} ID számmal nem található.");
 
-            // Ellenőrizzük, hogy a régi felhasználónév megegyezik-e
             if (existingEmployee.Username != employee.Username)
                 throw new ArgumentException("A régi felhasználónév nem a megadott ID-hoz tartozik.");
 
-            // Ellenőrizzük, hogy az új felhasználónév már foglalt-e
             var existingUsername = await _context.Employees
                 .AnyAsync(e => e.Username == employee.NewUsername && e.EmployeeId != EmployeeId);
             if (existingUsername)
@@ -201,12 +198,9 @@ namespace worksystem.Services
         {
              var existingEmployee = await ValidateEmployee(EmployeeId, employee.Username);
 
-            //Jelszóbevitel ellenőrzése
             _passwordService.ValidatePassword(employee.Password);
 
-            // A jelszó hash-olása
             var passwordHash = _passwordService.HashPassword(employee.Password);
-            //Hasholt jelszó mentése
             existingEmployee.PasswordHash = passwordHash;
             await _context.SaveChangesAsync();
 

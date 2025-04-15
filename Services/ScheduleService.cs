@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using worksystem.DTOs;
 using worksystem.Models;
@@ -35,7 +35,6 @@ namespace worksystem.Services
                 foreach (var schedule in group)
                 {
                     schedule.ScheduledMonthlyHours = total;
-                    // ScheduledHours újraszámolása mindig a DTO-ba mappelés előtt
                     schedule.ScheduledHours = ScheduleCalculator.CalculateHours(schedule.StartTime, schedule.EndTime);
                 }
             }

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using worksystem.DTOs;
 using worksystem.Models;
@@ -152,7 +152,6 @@ namespace worksystem.Services
                 SessionStatus = c.SessionStatus
             }).ToList();
 
-            // MonthlyReport keresése/létrehozása
             var monthlyReport = await _context.Monthlyreports
                 .FirstOrDefaultAsync(mr => mr.EmployeeId == checkpoint.EmployeeId && mr.ReportMonth == reportMonth);
 
@@ -167,8 +166,6 @@ namespace worksystem.Services
                 _context.Monthlyreports.Add(monthlyReport);
             }
 
-            // Régi helper osztályok eltávolítása, új logika alkalmazása
-            // A MonthlyReportService.UpdateOrCreateMonthlyReport metódust használjuk a frissítéshez
             var monthlyReportService = new MonthlyreportService(_context);
             var updatedMonthlyReport = await monthlyReportService.UpdateOrCreateMonthlyReportsPerDay(checkpoint.EmployeeId, reportMonth.Year, reportMonth.Month);
 
@@ -195,7 +192,6 @@ namespace worksystem.Services
         //CheckinTime vagy CheckoutTime módosítására alkalmas.
         public async Task<CheckpointDTO> UpdateCheckpoint(int EmployeeId, CheckpointDTO checkpoint)
         {
-            // Ellenőrizzük, hogy van-e aktív check-in a munkavállalóhoz
             var activeCheckpoint = await _context.Checkpoints
                 .Where(c => c.EmployeeId == EmployeeId)
                 .Where(c => c.CheckInTime != null)

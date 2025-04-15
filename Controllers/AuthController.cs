@@ -49,25 +49,25 @@ namespace worksystem.Controllers
             Console.WriteLine($"DB Hash: {employee?.PasswordHash}");
             if (employee != null)
             {
-                Console.WriteLine($"Verify result: {_passwordService.VerifyPassword(request.Password, employee.PasswordHash)}");
+                Console.WriteLine($"Jelszó ellenőrzése: {_passwordService.VerifyPassword(request.Password, employee.PasswordHash)}");
             }
 
             if (request == null || string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Password))
             {
-                return BadRequest("Invalid request data");
+                return BadRequest("Érvénytelen bejelentkezési adat");
             }
                     if (employee == null || string.IsNullOrEmpty(employee.PasswordHash))
                     {
-                        _logger.LogWarning($"Invalid login attempt for {request.Username}");
-                        return Unauthorized("Invalid username or password");
+                        _logger.LogWarning($"Érvénytelen bejelentkezés {request.Username}");
+                        return Unauthorized("Rossz jelszó vagy felhasználónév");
                     }
                     
-                    _logger.LogDebug($"Comparing password: '{request.Password}' with hash: '{employee.PasswordHash}'");
+                    _logger.LogDebug($"Jelszó ellenőrzése: '{request.Password}' with hash: '{employee.PasswordHash}'");
                     
                     if (!_passwordService.VerifyPassword(request.Password, employee.PasswordHash))
                     {
-                        _logger.LogWarning($"Invalid password for {request.Username}");
-                        return Unauthorized("Invalid username or password");
+                        _logger.LogWarning($"Rossz jelszó {request.Username}");
+                        return Unauthorized("Rossz jelszó vagy felhasználónév");
                     }
 
                     var token = _jwtService.GenerateToken(_mapper.Map<Employee>(employee));
@@ -139,7 +139,7 @@ namespace worksystem.Controllers
                 
                 var employee = await _employeeService.CreateEmployee(employeeDto);
                 
-                _logger.LogInformation($"First admin created: {employee.Username}");
+                _logger.LogInformation($"Első admin sikeresen hozzáadva: {employee.Username}");
 
                 return Ok(new 
                 {
@@ -151,13 +151,13 @@ namespace worksystem.Controllers
             }
             catch (InvalidOperationException ex) 
             {
-                _logger.LogError(ex, "Password validation failed");
+                _logger.LogError(ex, "Jelszó ellenőrzése sikertelen");
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating first admin");
-                return StatusCode(500, "Internal server error");
+                _logger.LogError(ex, "Hiba az első admin létrehozása során");
+                return StatusCode(500, "Belső szerverhiba");
             }
         }
     }

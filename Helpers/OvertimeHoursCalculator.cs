@@ -7,6 +7,7 @@ namespace worksystem.Helpers
 {
     public static class OvertimeHoursCalculator
     {
+        //Túlóra számítása Schedule és Worklog alapján
          public static decimal CalculateOvertimeHours(Schedule schedule, decimal workHours)
         {
             if (schedule == null)
@@ -17,7 +18,7 @@ namespace worksystem.Helpers
 
             return workHours - schedule.ScheduledHours;
         }
-
+        //Túlóra számítása Schedule és Worklog alapján
         public static Dictionary<DateOnly, decimal> CalculateOvertimeHoursPerDay(
             IEnumerable<Schedule> schedules,
             Dictionary<DateOnly, decimal> workHoursPerDay)
@@ -35,6 +36,7 @@ namespace worksystem.Helpers
                         : -s.ScheduledHours
                 );
         }
+        //Havi túlóra számítása Monthlyreport és Schedule alapján napokra
         public static decimal CalculateMonthlyOvertimeHours(
             IEnumerable<Schedule> schedules,
             Dictionary<DateOnly, decimal> workHoursPerDay,
@@ -59,10 +61,10 @@ namespace worksystem.Helpers
             return totalOvertime;
         }
 
-        // Havi túlóra számítása Monthlyreport és Schedule alapján
+        //Havi túlóra számítása Monthlyreport és Schedule alapján összes
         public static decimal CalculateMonthlyOvertimeHours(
-            decimal monthlyWorkHours, // Monthlyreportból számolt ledolgozott órák
-            decimal monthlyScheduledHours // Schedule-ból számolt beosztott órák
+            decimal monthlyWorkHours, 
+            decimal monthlyScheduledHours 
         )
         {
             if (monthlyWorkHours > monthlyScheduledHours)

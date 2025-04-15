@@ -101,10 +101,14 @@ namespace worksystem.Controllers
                 return NotFound();
             return Ok(employee);
         }
-        [HttpPut("employees/{employeeId}/password")]
-        public async Task<IActionResult> UpdatePassword(int employeeId, [FromBody] EmployeeDTO employee)
+       [HttpPut("employees/password")]
+        public async Task<IActionResult> UpdateOwnPassword([FromBody] EmployeeDTO employee)
         {
-            var updatedEmployee = await _employeeService.UpdatePasswordByEmployeeId(employeeId, employee);
+            var userIdString = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
+                return Unauthorized();
+
+            var updatedEmployee = await _employeeService.UpdatePasswordByEmployeeId(userId, employee);
             return Ok(updatedEmployee);
         }
         // Monthlyreport endpoints

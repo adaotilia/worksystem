@@ -20,7 +20,6 @@ namespace worksystem.Services
         //Összes havi kimutatás listázása.
         public async Task<List<MonthlyreportDTO>> GetAllMonthlyreportsByReportMonth(DateOnly ReportMonth)
         {
-            // Automatikus generálás/frissítés minden dolgozóra az adott hónapban
             var employeeIds = await _context.Employees.Select(e => e.EmployeeId).ToListAsync();
             foreach (var employeeId in employeeIds)
             {
@@ -51,7 +50,6 @@ namespace worksystem.Services
         //Egy dolgozó kiválasztott havi kimutatása EmployeeId alapján.
         public async Task<List<MonthlyreportDTO>> GetMonthlyreportsByEmployeeId(int EmployeeId)
         {
-            // Lekérjük az összes hónapot, ahol van beosztás vagy checkpoint
             var months = await _context.Schedules
                 .Where(s => s.EmployeeId == EmployeeId)
                 .Select(s => new { s.ScheduledDate.Year, s.ScheduledDate.Month })
@@ -91,7 +89,6 @@ namespace worksystem.Services
             var employee = await _context.Employees.FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
             if (employee == null) throw new InvalidOperationException("Dolgozó nem található.");
 
-            // Lekérjük az adott hónap összes checkpointját
             var checkpoints = await _context.Checkpoints
                 .Where(c => c.EmployeeId == employeeId && c.CheckInTime.HasValue && c.CheckOutTime.HasValue &&
                     c.CheckInTime.Value.Year == year && c.CheckInTime.Value.Month == month)
@@ -104,7 +101,6 @@ namespace worksystem.Services
                 SessionStatus = c.SessionStatus
             }).ToList();
 
-            // Csoportosítás napokra
             var days = checkpointDtos
                 .Where(cp => cp.CheckInTime.HasValue && cp.CheckOutTime.HasValue)
                 .GroupBy(cp => cp.CheckInTime.Value.Date)
@@ -124,7 +120,6 @@ namespace worksystem.Services
                 var overtime = worksystem.Helpers.OvertimeHoursCalculator.CalculateMonthlyOvertimeHours(workHours, scheduledHours);
                 monthlyOvertimeSum += overtime;
 
-                // Keresd, van-e már ilyen rekord
                 var monthlyReport = await _context.Monthlyreports.FirstOrDefaultAsync(mr => mr.EmployeeId == employeeId && mr.Date == day);
                 if (monthlyReport == null)
                 {
@@ -132,7 +127,7 @@ namespace worksystem.Services
                     {
                         EmployeeId = employeeId,
                         Employee = employee,
-                        ReportMonth = reportMonth, // év.hónap első napja
+                        ReportMonth = reportMonth,
                         Date = day
                     };
                     _context.Monthlyreports.Add(monthlyReport);
@@ -141,13 +136,10 @@ namespace worksystem.Services
                 monthlyReport.MonthlyWorkDays = workDay;
                 monthlyReport.MonthlyWorkHours = workHours;
                 monthlyReport.OvertimeHours = overtime;
-                // NAPI túlóra!
-                // monthlyReport.MonthlyOvertimeHours = overtime; // Ezt NEM töltjük itt!
 
                 reports.Add(monthlyReport);
             }
 
-            // Havi összesített rekord (ReportMonth naphoz tartozó rekord)
             var monthlySummary = await _context.Monthlyreports.FirstOrDefaultAsync(mr => mr.EmployeeId == employeeId && mr.Date == reportMonth);
             if (monthlySummary == null)
             {

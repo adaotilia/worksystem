@@ -54,6 +54,10 @@ builder.Services.AddControllers()
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] 
     ?? throw new InvalidOperationException("JWT Key is missing"));
 
+// Több elfogadott Issuer és Audience
+var validIssuers = new[] { "https://localhost:8080", "https://worksystem.onrender.com" };
+var validAudiences = new[] { "https://localhost:5050", "https://worksystem.onrender.com" };
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -62,9 +66,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(key),
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidIssuers = validIssuers,
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidAudiences = validAudiences,
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero,
             RequireExpirationTime = true
