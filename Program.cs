@@ -145,8 +145,8 @@ builder.Services.AddSwaggerGen(c => {
 });
 var app = builder.Build();
 
-// Fejlesztői környezet konfigurációja
-if (app.Environment.IsDevelopment())
+// Swagger engedélyezése Production környezetben is
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
