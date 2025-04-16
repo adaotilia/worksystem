@@ -15,7 +15,7 @@ RUN dotnet publish worksystem.csproj -c Release -o out
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/out .
-ENV ASPNETCORE_URLS=http://+:8080
-ENV ASPNETCORE_URLS=http://*:$PORT
+ENV ASPNETCORE_URLS=http://+:8080;http://*:$PORT
+EXPOSE 8080
 EXPOSE $PORT
 ENTRYPOINT ["dotnet", "worksystem.dll"]
