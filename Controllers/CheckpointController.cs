@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using worksystem.Services;
@@ -27,44 +27,69 @@ namespace worksystem.Controllers
         [HttpPost("start")]
         public async Task<IActionResult> StartWork(string employeeId)
         {
-            var activeCheckpoint = await _checkpointService.GetSessionStatusByEmployeeId(int.Parse(employeeId), DateTime.Now);
-            
-            if (activeCheckpoint == SessionStatus.Active)
+            if (!int.TryParse(employeeId, out var employeeIdInt))
             {
-                return BadRequest("Már van aktív munkafolyamat.");
+                return BadRequest("Hibás dolgozó azonosító formátum.");
             }
 
-            var employee = await _employeeService.GetEmployeeById(int.Parse(employeeId));
-            if (employee == null)
+            try
             {
-                return BadRequest("Nem létező dolgozó azonosító.");
-            }
+                var activeCheckpoint = await _checkpointService.GetSessionStatusByEmployeeId(employeeIdInt, DateTime.Now);
+                
+                if (activeCheckpoint == SessionStatus.Active)
+                {
+                    return BadRequest("Már van aktív munkafolyamat.");
+                }
 
-            return Ok(new 
+                var employee = await _employeeService.GetEmployeeById(employeeIdInt);
+                var newCheckpoint = new CheckpointDTO
+                {
+                    EmployeeId = employeeIdInt,
+                    CheckInTime = DateTime.Now,
+                    CheckOutTime = null,
+                    SessionStatus = SessionStatus.Active
+                };
+
+                await _checkpointService.CreateCheckpoint(newCheckpoint);
+
+                return Ok(new 
+                {
+                    employeeName = employee.Username,
+                    confirmation = "A megadott azonosítóhoz tartozó felhasználónév a következő: " + employee.Username + ". Megerősíti a munkaba való belépést?"
+                });
+            }
+            catch (KeyNotFoundException)
             {
-                message = "Munka elkezdődött.",
-                employeeName = employee.Username,
-                confirmation = "A megadott azonosítóhoz tartozó felhasználónév a következő: " + employee.Username + ". Megerősíti a munkaba való belépést?"
-            });
+                return NotFound("Nincs ilyen dolgozó azonosító.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Belső szerverhiba: " + ex.Message);
+            }
         }
 
         [HttpPost("end")]
         public async Task<IActionResult> EndWork(string employeeId)
         {
-            var activeCheckpoint = await _checkpointService.GetSessionStatusByEmployeeId(int.Parse(employeeId), DateTime.Now);
+            if (!int.TryParse(employeeId, out var employeeIdInt))
+            {
+                return BadRequest("Hibás dolgozó azonosító formátum.");
+            }
+
+            var activeCheckpoint = await _checkpointService.GetSessionStatusByEmployeeId(employeeIdInt, DateTime.Now);
             
             if (activeCheckpoint != SessionStatus.Active)
             {
                 return BadRequest("Nincs aktív munkafolyamat.");
             }
 
-            var employee = await _employeeService.GetEmployeeById(int.Parse(employeeId));
+            var employee = await _employeeService.GetEmployeeById(employeeIdInt);
             if (employee == null)
             {
                 return BadRequest("Nem létező dolgozó azonosító.");
             }
 
-            var checkpoint = await _checkpointService.GetCheckpointsByEmployeeId(int.Parse(employeeId), DateTime.Now.Year, DateTime.Now.Month);
+            var checkpoint = await _checkpointService.GetCheckpointsByEmployeeId(employeeIdInt, DateTime.Now.Year, DateTime.Now.Month);
             var lastCheckpoint = checkpoint.OrderByDescending(c => c.CheckInTime).FirstOrDefault();
 
             if (lastCheckpoint == null || lastCheckpoint.CheckOutTime != null)
@@ -72,15 +97,19 @@ namespace worksystem.Controllers
                 return BadRequest("Nincs aktív munkafolyamat.");
             }
 
-           lastCheckpoint.CheckOutTime = DateTime.Now;
-            lastCheckpoint.SessionStatus = SessionStatus.Inactive;
+            var updateDto = new CheckpointDTO
+            {
+                CheckInTime = lastCheckpoint.CheckInTime,
+                CheckOutTime = DateTime.Now,
+                SessionStatus = SessionStatus.Inactive
+            };
 
-            await _checkpointService.UpdateCheckpoint(int.Parse(employeeId), lastCheckpoint);
+            await _checkpointService.UpdateCheckpoint(employeeIdInt, updateDto);
+
             return Ok(new 
             { 
-                message = "Munka lezárult.",
                 employeeName = employee.Username,
-                duration = lastCheckpoint.CheckOutTime.Value - lastCheckpoint.CheckInTime,
+                duration = updateDto.CheckOutTime.Value - updateDto.CheckInTime,
                 confirmation = "A megadott azonosítóhoz tartozó felhasználónév a következő: " + employee.Username + ". Megerősíti a munkaba való kilépést?"
             });
         }
