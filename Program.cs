@@ -54,9 +54,9 @@ builder.Services.AddControllers()
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] 
     ?? throw new InvalidOperationException("JWT Key is missing"));
 
-// Több elfogadott Issuer és Audience
-var validIssuers = new[] { "https://localhost:8080", "https://worksystem.onrender.com" };
-var validAudiences = new[] { "https://localhost:5050", "https://worksystem.onrender.com" };
+// Több elfogadott Issuer és Audience a konfigurációból
+var validIssuers = builder.Configuration.GetSection("Jwt:Issuer").Get<string[]>();
+var validAudiences = builder.Configuration.GetSection("Jwt:Audience").Get<string[]>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -124,6 +124,18 @@ builder.Services.RegisterAppServices();
 //Automapper beállítása
 builder.Services.AddAutoMapper(typeof(Program));
 
+var allowedOrigins = builder.Configuration.GetSection("FrontendUrls").Get<string[]>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 // Swagger konfiguráció
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => {
@@ -155,12 +167,10 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseHttpsRedirection();
 
-app.UseCors(builder =>
-    builder.AllowAnyOrigin()
-           .AllowAnyMethod()
-           .AllowAnyHeader());
+app.UseCors("FrontendPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();

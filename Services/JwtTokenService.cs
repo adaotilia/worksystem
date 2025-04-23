@@ -42,9 +42,15 @@ namespace worksystem.Services
                 )
             );
 
+            var issuers = _configuration.GetSection("Jwt:Issuer").Get<string[]>();
+            var audiences = _configuration.GetSection("Jwt:Audience").Get<string[]>();
+
+            var issuer = issuers?.FirstOrDefault() ?? _configuration["Jwt:Issuer"];
+            var audience = audiences?.FirstOrDefault() ?? _configuration["Jwt:Audience"];
+
             var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
+                issuer: issuer,
+                audience: audience,
                 claims: claims,
                 expires: expires,
                 signingCredentials: creds
@@ -68,14 +74,17 @@ namespace worksystem.Services
             
             try
             {
+                var issuers = _configuration.GetSection("Jwt:Issuer").Get<string[]>();
+                var audiences = _configuration.GetSection("Jwt:Audience").Get<string[]>();
+
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = true,
-                    ValidIssuer = _configuration["Jwt:Issuer"],
+                    ValidIssuers = issuers,
                     ValidateAudience = true,
-                    ValidAudience = _configuration["Jwt:Audience"],
+                    ValidAudiences = audiences,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 }, out SecurityToken validatedToken);

@@ -55,7 +55,7 @@ namespace worksystem.Controllers
                 return Ok(new 
                 {
                     employeeName = employee.Username,
-                    confirmation = "A megadott azonosítóhoz tartozó felhasználónév a következő: " + employee.Username + ". Megerősíti a munkaba való belépést?"
+                    confirmation = "A megadott azonosítóhoz tartozó felhasználónév a következő: " + employee.Username
                 });
             }
             catch (KeyNotFoundException)
@@ -110,7 +110,7 @@ namespace worksystem.Controllers
             { 
                 employeeName = employee.Username,
                 duration = updateDto.CheckOutTime.Value - updateDto.CheckInTime,
-                confirmation = "A megadott azonosítóhoz tartozó felhasználónév a következő: " + employee.Username + ". Megerősíti a munkaba való kilépést?"
+                confirmation = "A megadott azonosítóhoz tartozó felhasználónév a következő: " + employee.Username
             });
         }
     }
