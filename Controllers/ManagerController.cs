@@ -156,17 +156,27 @@ namespace worksystem.Controllers
         [HttpPost("schedules")]
         public async Task<IActionResult> CreateSchedule([FromQuery] int employeeId, [FromBody] ScheduleDTO schedule)
         {
-            var createdSchedule = await _scheduleService.CreateSchedule(employeeId, schedule);
-            return CreatedAtAction(nameof(GetSchedulesByEmployeeId), new { employeeId = createdSchedule.EmployeeId, year = DateTime.Now.Year, month = DateTime.Now.Month }, createdSchedule);
+            try
+            {
+                var createdSchedule = await _scheduleService.CreateSchedule(employeeId, schedule);
+                return CreatedAtAction(nameof(GetSchedulesByEmployeeId), new { employeeId = createdSchedule.EmployeeId, year = DateTime.Now.Year, month = DateTime.Now.Month }, createdSchedule);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
 
-        [HttpPut("schedules/employee/{employeeId}/{year}/{month}")]
-        public async Task<IActionResult> UpdateSchedule(int employeeId, int year, int month, [FromBody] ScheduleDTO schedule)
+        [HttpPut("schedules/employee/{employeeId}/{year}/{month}/{day}")]
+        public async Task<IActionResult> UpdateSchedule(int employeeId, int year, int month, int day, [FromBody] ScheduleDTO schedule)
         {
             try
             {
-                var date = new DateOnly(year, month, 1);
-                var updatedSchedule = await _scheduleService.UpdateSchedule(employeeId, date, schedule);
+                var updatedSchedule = await _scheduleService.UpdateSchedule(employeeId, year, month, day, schedule);
                 return Ok(updatedSchedule);
             }
             catch (ArgumentException ex)
@@ -179,12 +189,22 @@ namespace worksystem.Controllers
             }
         }
 
-        [HttpDelete("schedules/employee/{employeeId}/{year}/{month}")]
-        public async Task<IActionResult> DeleteSchedule(int employeeId, int year, int month)
+        [HttpDelete("schedules/employee/{employeeId}/{year}/{month}/{day}")]
+        public async Task<IActionResult> DeleteSchedule(int employeeId, int year, int month, int day)
         {
-            var date = new DateOnly(year, month, 1);
-            await _scheduleService.DeleteSchedule(employeeId, date);
-            return NoContent();
+            try
+            {
+                await _scheduleService.DeleteSchedule(employeeId, year, month, day);
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
 
         // Worklog endpoints

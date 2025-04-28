@@ -241,23 +241,56 @@ namespace worksystem.Controllers
         [HttpGet("schedules/{year}/{month}")]
         public async Task<IActionResult> GetSchedulesByMonth(int year, int month)
         {
-            var date = new DateOnly(year, month, 1);
-            var schedules = await _scheduleService.GetAllSchedulesByMonth(date);
-            return Ok(schedules);
+            try
+            {
+                var date = new DateOnly(year, month, 1);
+                var schedules = await _scheduleService.GetAllSchedulesByMonth(date);
+                return Ok(schedules);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
         [HttpGet("schedules/employee/{employeeId}/{year}/{month}")]
         public async Task<IActionResult> GetSchedulesByEmployeeId(int employeeId, int year, int month)
         {
-            var schedules = await _scheduleService.GetSchedulesByEmployeeId(employeeId);
-            return Ok(schedules);
+            try
+            {
+                var schedules = await _scheduleService.GetSchedulesByEmployeeId(employeeId);
+                return Ok(schedules);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
 
         [HttpGet("schedules/date/{year}/{month}/{day}")]
         public async Task<IActionResult> GetSchedulesByDate(int year, int month, int day)
         {
-            var date = new DateOnly(year, month, day);
-            var schedules = await _scheduleService.GetSchedulesByDate(date);
-            return Ok(schedules);
+            try
+            {
+                var date = new DateOnly(year, month, day);
+                var schedules = await _scheduleService.GetSchedulesByDate(date);
+                return Ok(schedules);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
 
         [HttpPost("schedules")]
@@ -267,13 +300,12 @@ namespace worksystem.Controllers
             return CreatedAtAction(nameof(GetSchedulesByEmployeeId), new { employeeId = createdSchedule.EmployeeId, year = DateTime.Now.Year, month = DateTime.Now.Month }, createdSchedule);
         }
 
-        [HttpPut("schedules/employee/{employeeId}/{year}/{month}")]
-        public async Task<IActionResult> UpdateSchedule(int employeeId, int year, int month, [FromBody] ScheduleDTO schedule)
+        [HttpPut("schedules/employee/{employeeId}/{year}/{month}/{day}")]
+        public async Task<IActionResult> UpdateSchedule(int employeeId, int year, int month, int day, [FromBody] ScheduleDTO schedule)
         {
             try
             {
-                var date = new DateOnly(year, month, 1);
-                var updatedSchedule = await _scheduleService.UpdateSchedule(employeeId, date, schedule);
+                var updatedSchedule = await _scheduleService.UpdateSchedule(employeeId, year, month, day, schedule);
                 return Ok(updatedSchedule);
             }
             catch (ArgumentException ex)
@@ -286,11 +318,10 @@ namespace worksystem.Controllers
             }
         }
 
-        [HttpDelete("schedules/employee/{employeeId}/{year}/{month}")]
-        public async Task<IActionResult> DeleteSchedule(int employeeId, int year, int month)
+        [HttpDelete("schedules/employee/{employeeId}/{year}/{month}/{day}")]
+        public async Task<IActionResult> DeleteSchedule(int employeeId, int year, int month, int day)
         {
-            var date = new DateOnly(year, month, 1);
-            await _scheduleService.DeleteSchedule(employeeId, date);
+            await _scheduleService.DeleteSchedule(employeeId, year, month, day);
             return NoContent();
         }
 

@@ -98,17 +98,39 @@ namespace worksystem.Controllers
         [HttpGet("schedules/{year}/{month}")]
         public async Task<IActionResult> GetSchedules(int year, int month)
         {
-            var employeeId = GetEmployeeIdFromToken();
-            var schedules = await _scheduleService.GetSchedulesByEmployeeId(employeeId);
-            return Ok(schedules);
+            try
+            {
+                var employeeId = GetEmployeeIdFromToken();
+                var schedules = await _scheduleService.GetSchedulesByEmployeeId(employeeId);
+                return Ok(schedules);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
         [HttpGet("schedules/date/{year}/{month}/{day}")]
         public async Task<IActionResult> GetSchedulesByDate(int year, int month, int day)
         {
-            var employeeId = GetEmployeeIdFromToken(); 
-            var date = new DateOnly(year, month, day);
-            var schedules = await _scheduleService.GetSchedulesByEmployeeId(employeeId);
-            return Ok(schedules);
+            try
+            {
+                var employeeId = GetEmployeeIdFromToken(); 
+                var date = new DateOnly(year, month, day);
+                var schedules = await _scheduleService.GetSchedulesByEmployeeId(employeeId);
+                return Ok(schedules);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
         //Worklog endpoints
         [HttpGet("worklogs/{year}/{month}")]

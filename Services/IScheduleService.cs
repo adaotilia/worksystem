@@ -1,4 +1,4 @@
-﻿using worksystem.DTOs;
+using worksystem.DTOs;
 using worksystem.Models;
 using worksystem.Data;
 
@@ -10,7 +10,7 @@ namespace worksystem.Services
         Task<List<ScheduleDTO>> GetSchedulesByEmployeeId(int EmployeeId);
         Task<List<ScheduleDTO>> GetSchedulesByDate(DateOnly Date);
         Task<ScheduleDTO> CreateSchedule(int EmployeeId, ScheduleDTO schedule);
-        Task<ScheduleDTO> UpdateSchedule(int EmployeeId, DateOnly month, ScheduleDTO schedule);
-        Task DeleteSchedule(int EmployeeId, DateOnly month);
+        Task<ScheduleDTO> UpdateSchedule(int EmployeeId, int year, int month, int day, ScheduleDTO schedule);
+        Task DeleteSchedule(int EmployeeId, int year, int month, int day);
     }
 }

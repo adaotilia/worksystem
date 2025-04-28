@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using worksystem.DTOs;
 using worksystem.Models;
@@ -172,17 +172,14 @@ namespace worksystem.Services
                 ScheduledWorkDays = newSchedule.ScheduledWorkDays
             };
         }
-        //Beosztás módosítása Id és hónap alapján.
-        public async Task<ScheduleDTO> UpdateSchedule(int EmployeeId, DateOnly month, ScheduleDTO schedule)
+        //Beosztás módosítása Id és dátum alapján.
+        public async Task<ScheduleDTO> UpdateSchedule(int EmployeeId, int year, int month, int day, ScheduleDTO schedule)
         {
-            var monthStart = new DateOnly(month.Year, month.Month, 1);
-            var monthEnd = new DateOnly(month.Year, month.Month, DateTime.DaysInMonth(month.Year, month.Month));
+            var scheduledDate = new DateOnly(year, month, day);
 
             var existingSchedule = await _context.Schedules
-                .Where(s => s.EmployeeId == EmployeeId && 
-                        s.ScheduledDate >= monthStart && 
-                        s.ScheduledDate <= monthEnd)
-                .FirstOrDefaultAsync();
+                .Include(s => s.Employee)
+                .FirstOrDefaultAsync(s => s.EmployeeId == EmployeeId && s.ScheduledDate == scheduledDate);
 
             if (existingSchedule == null)
             {
@@ -214,17 +211,13 @@ namespace worksystem.Services
                 ScheduledWorkDays = existingSchedule.ScheduledWorkDays
             };
         }
-        //Megadott Id és hónap alapján beosztás törlése.
-        public async Task DeleteSchedule(int EmployeeId, DateOnly month)
+        //Beosztás törlése Id és dátum alapján.
+        public async Task DeleteSchedule(int EmployeeId, int year, int month, int day)
         {
-            var monthStart = new DateOnly(month.Year, month.Month, 1);
-            var monthEnd = new DateOnly(month.Year, month.Month, DateTime.DaysInMonth(month.Year, month.Month));
+            var scheduledDate = new DateOnly(year, month, day);
 
             var schedule = await _context.Schedules
-                .Where(s => s.EmployeeId == EmployeeId && 
-                        s.ScheduledDate >= monthStart && 
-                        s.ScheduledDate <= monthEnd)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(s => s.EmployeeId == EmployeeId && s.ScheduledDate == scheduledDate);
 
             if (schedule == null)
             {
