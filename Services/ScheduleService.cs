@@ -32,10 +32,12 @@ namespace worksystem.Services
             {
                 decimal total = ScheduleCalculator.CalculateMonthlyScheduledHours(
                     group, group.Key.Year, group.Key.Month);
+                int scheduledWorkDays = ScheduleCalculator.CountScheduledShiftsAndOvertimes(group.ToList());
                 foreach (var schedule in group)
                 {
                     schedule.ScheduledMonthlyHours = total;
                     schedule.ScheduledHours = ScheduleCalculator.CalculateHours(schedule.StartTime, schedule.EndTime);
+                    schedule.ScheduledWorkDays = scheduledWorkDays;
                 }
             }
             await _context.SaveChangesAsync();
@@ -51,7 +53,7 @@ namespace worksystem.Services
                 Type = schedule.Type,
                 ScheduledHours = ScheduleCalculator.CalculateHours(schedule.StartTime, schedule.EndTime),
                 ScheduledMonthlyHours = schedule.ScheduledMonthlyHours,
-                ScheduledWorkDays = ScheduleCalculator.CountScheduledShiftsAndOvertimes(new List<Schedule> { schedule })
+                ScheduledWorkDays = schedule.ScheduledWorkDays
             }).ToList();
         }
         //A megadott hónaphoz tartozó besoztás lekérése Id alapján.
@@ -67,10 +69,12 @@ namespace worksystem.Services
             {
                 decimal total = ScheduleCalculator.CalculateMonthlyScheduledHours(
                     group, group.Key.Year, group.Key.Month);
+                int scheduledWorkDays = ScheduleCalculator.CountScheduledShiftsAndOvertimes(group.ToList());
                 foreach (var schedule in group)
                 {
                     schedule.ScheduledMonthlyHours = total;
                     schedule.ScheduledHours = ScheduleCalculator.CalculateHours(schedule.StartTime, schedule.EndTime);
+                    schedule.ScheduledWorkDays = scheduledWorkDays;
                 }
             }
             await _context.SaveChangesAsync();
@@ -86,7 +90,7 @@ namespace worksystem.Services
                 Type = schedule.Type,
                 ScheduledHours = ScheduleCalculator.CalculateHours(schedule.StartTime, schedule.EndTime),
                 ScheduledMonthlyHours = schedule.ScheduledMonthlyHours,
-                ScheduledWorkDays = ScheduleCalculator.CountScheduledShiftsAndOvertimes(new List<Schedule> { schedule })
+                ScheduledWorkDays = schedule.ScheduledWorkDays
             }).ToList();
         }
         //A megadott dátumhoz tartozó összes besoztás lekérése.
@@ -102,10 +106,12 @@ namespace worksystem.Services
             {
                 decimal total = ScheduleCalculator.CalculateMonthlyScheduledHours(
                     group, group.Key.Year, group.Key.Month);
+                int scheduledWorkDays = ScheduleCalculator.CountScheduledShiftsAndOvertimes(group.ToList());
                 foreach (var schedule in group)
                 {
                     schedule.ScheduledMonthlyHours = total;
                     schedule.ScheduledHours = ScheduleCalculator.CalculateHours(schedule.StartTime, schedule.EndTime);
+                    schedule.ScheduledWorkDays = scheduledWorkDays;
                 }
             }
             await _context.SaveChangesAsync();
@@ -121,7 +127,7 @@ namespace worksystem.Services
                 Type = schedule.Type,
                 ScheduledHours = ScheduleCalculator.CalculateHours(schedule.StartTime, schedule.EndTime),
                 ScheduledMonthlyHours = schedule.ScheduledMonthlyHours,
-                ScheduledWorkDays = ScheduleCalculator.CountScheduledShiftsAndOvertimes(new List<Schedule> { schedule })
+                ScheduledWorkDays = schedule.ScheduledWorkDays
             }).ToList();
         }
         //Megadott Id alapján beosztás készítése.
