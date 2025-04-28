@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -55,13 +55,6 @@ namespace worksystem.Controllers
             return Ok(status);
         }
 
-        [HttpGet("checkpoints/employee/{employeeId}/times/{year}/{month}")]
-        public async Task<IActionResult> GetCheckTimesByEmployeeId(int employeeId, int year, int month)
-        {
-            var times = await _checkpointService.GetCheckTimesByEmployeeId(employeeId, year, month);
-            return Ok(times);
-        }
-
         [HttpPost("checkpoints")]
         public async Task<IActionResult> CreateCheckpoint(CheckpointDTO checkpoint)
         {
@@ -69,17 +62,17 @@ namespace worksystem.Controllers
             return CreatedAtAction(nameof(GetCheckpointsByEmployeeId), new { employeeId = createdCheckpoint.EmployeeId, year = DateTime.Now.Year, month = DateTime.Now.Month }, createdCheckpoint);
         }
 
-        [HttpPut("checkpoints/employee/{employeeId}")]
-        public async Task<IActionResult> UpdateCheckpoint(int employeeId, [FromBody] CheckpointDTO checkpoint)
+        [HttpPut("checkpoints/{employeeId}/{checkpointId}")]
+        public async Task<IActionResult> UpdateCheckpoint(int employeeId, int checkpointId, [FromBody] CheckpointDTO checkpoint)
         {
-            var updatedCheckpoint = await _checkpointService.UpdateCheckpoint(employeeId, checkpoint);
+            var updatedCheckpoint = await _checkpointService.UpdateCheckpoint(employeeId, checkpointId, checkpoint);
             return Ok(updatedCheckpoint);
         }
 
-        [HttpDelete("checkpoints/employee/{employeeId}")]
-        public async Task<IActionResult> DeleteCheckpoint(int employeeId)
+        [HttpDelete("checkpoints/{employeeId}/{checkpointId}")]
+        public async Task<IActionResult> DeleteCheckpoint(int employeeId, int checkpointId)
         {
-            await _checkpointService.DeleteCheckpoint(employeeId);
+            await _checkpointService.DeleteCheckpoint(employeeId, checkpointId);
             return NoContent();
         }
 

@@ -62,13 +62,6 @@ namespace worksystem.Controllers
             return Ok(status);
         }
 
-        [HttpGet("checkpoints/employee/{employeeId}/times/{year}/{month}")]
-        public async Task<IActionResult> GetCheckTimesByEmployeeId(int employeeId, int year, int month)
-        {
-            var times = await _checkpointService.GetCheckTimesByEmployeeId(employeeId, year, month);
-            return Ok(times);
-        }
-
         // Employee endpoints
         [HttpGet("employees")]
         public async Task<IActionResult> GetAllEmployees()

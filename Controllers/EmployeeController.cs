@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -48,19 +48,13 @@ namespace worksystem.Controllers
             var checkpoints = await _checkpointService.GetCheckpointsByEmployeeId(employeeId, year, month);
             return Ok(checkpoints);
         }
-        [HttpGet("checkpoints/status/{date:datetime}")]
-        public async Task<IActionResult> GetSessionStatus(int year, int month, DateTime date)
+        [HttpGet("checkpoints/status/{year:int}/{month:int}/{day:int}")]
+        public async Task<IActionResult> GetSessionStatus(int year, int month, int day)
         {
             var employeeId = GetEmployeeIdFromToken(); 
+            var date = new DateTime(year, month, day);
             var status = await _checkpointService.GetSessionStatusByEmployeeId(employeeId, date);
             return Ok(status);
-        }
-        [HttpGet("checkpoints/times/{year}/{month}")]
-        public async Task<IActionResult> GetCheckTimes(int year, int month)
-        {
-            var employeeId = GetEmployeeIdFromToken();
-            var times = await _checkpointService.GetCheckTimesByEmployeeId(employeeId, year, month);
-            return Ok(times);
         }
         //Employee endpoints
         [HttpGet("employees/me")]

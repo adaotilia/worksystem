@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using worksystem.DTOs;
 using worksystem.Models;
@@ -78,31 +78,6 @@ namespace worksystem.Services
                 return SessionStatus.Inactive;
 
             return CalculateStatus(checkpoint);
-        }
-        //A megadott ID-hoz tartozó összes CheckinTime és CheckoutTime egy hónapban.
-        public async Task<(List<DateTime?> CheckinTimes, List<DateTime> CheckoutTimes)> GetCheckTimesByEmployeeId(int EmployeeId, int year, int month)
-        {
-            var firstDayOfMonth = new DateTime(year, month, 1);
-            var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
-
-            var checkpoints = await _context.Checkpoints
-                .Where(c => c.EmployeeId == EmployeeId)
-                .Where(c => c.CheckInTime >= firstDayOfMonth && c.CheckInTime <= lastDayOfMonth)
-                .ToListAsync();
-
-            var checkinTimes = checkpoints
-                .Where(c => c.CheckInTime != null)
-                .OrderByDescending(c => c.CheckInTime)
-                .Select(c => c.CheckInTime)
-                .ToList();
-
-            var checkoutTimes = checkpoints
-                .Where(c => c.CheckOutTime != null)
-                .OrderByDescending(c => c.CheckOutTime)
-                .Select(c => c.CheckOutTime.Value)
-                .ToList();
-
-            return (checkinTimes, checkoutTimes);
         }
         // CheckinTime és CheckoutTime manuális hozzáadására alkalmas.
         public async Task<CheckpointDTO> CreateCheckpoint(CheckpointDTO checkpoint)
@@ -189,64 +164,55 @@ namespace worksystem.Services
                 SessionStatus = checkpointEntity.SessionStatus
             };
         }
-        //CheckinTime vagy CheckoutTime módosítására alkalmas.
-        public async Task<CheckpointDTO> UpdateCheckpoint(int EmployeeId, CheckpointDTO checkpoint)
+        // Bármely checkpoint (akár múltbeli) módosítására alkalmas, CheckpointId és EmployeeId alapján
+        public async Task<CheckpointDTO> UpdateCheckpoint(int employeeId, int checkpointId, CheckpointDTO checkpoint)
         {
-            var activeCheckpoint = await _context.Checkpoints
-                .Where(c => c.EmployeeId == EmployeeId)
-                .Where(c => c.CheckInTime != null)
-                .Where(c => c.CheckOutTime == null)
-                .FirstOrDefaultAsync();
+            var checkpointToUpdate = await _context.Checkpoints
+                .FirstOrDefaultAsync(c => c.CheckpointId == checkpointId && c.EmployeeId == employeeId);
 
-            if (activeCheckpoint == null)
+            if (checkpointToUpdate == null)
             {
-                throw new InvalidOperationException("Nincs aktív Belépési idő a munkavállalóhoz, a Hozzáadás lehetőséget használja.");
+                throw new InvalidOperationException("A megadott azonosítóval nem található checkpoint az adott dolgozóhoz.");
             }
 
             if (checkpoint.CheckInTime != null)
             {
-                activeCheckpoint.CheckInTime = checkpoint.CheckInTime;
+                checkpointToUpdate.CheckInTime = checkpoint.CheckInTime;
             }
 
             if (checkpoint.CheckOutTime != null)
             {
-                activeCheckpoint.CheckOutTime = checkpoint.CheckOutTime;
-                activeCheckpoint.SessionStatus = SessionStatus.Inactive;
+                checkpointToUpdate.CheckOutTime = checkpoint.CheckOutTime;
+                checkpointToUpdate.SessionStatus = SessionStatus.Inactive;
             }
             else
             {
-                activeCheckpoint.SessionStatus = CalculateStatus(activeCheckpoint);
+                checkpointToUpdate.SessionStatus = CalculateStatus(checkpointToUpdate);
             }
 
             await _context.SaveChangesAsync();
 
             return new CheckpointDTO
             {
-                CheckpointId = activeCheckpoint.CheckpointId,
-                EmployeeId = activeCheckpoint.EmployeeId,
-                CheckInTime = activeCheckpoint.CheckInTime,
-                CheckOutTime = activeCheckpoint.CheckOutTime,
-                SessionStatus = activeCheckpoint.SessionStatus
+                CheckpointId = checkpointToUpdate.CheckpointId,
+                EmployeeId = checkpointToUpdate.EmployeeId,
+                CheckInTime = checkpointToUpdate.CheckInTime,
+                CheckOutTime = checkpointToUpdate.CheckOutTime,
+                SessionStatus = checkpointToUpdate.SessionStatus
             };
         }
-        //CheckinTime és CheckoutTime törlésére alkalmas.
-        public async Task DeleteCheckpoint(int EmployeeId)
+        // Checkpoint törlése CheckpointId és EmployeeId alapján
+        public async Task DeleteCheckpoint(int employeeId, int checkpointId)
         {
-            var activeCheckpoint = await _context.Checkpoints
-                .Where(c => c.EmployeeId == EmployeeId)
-                .Where(c => c.CheckInTime != null)
-                .Where(c => c.CheckOutTime == null)
-                .FirstOrDefaultAsync();
+            var checkpoint = await _context.Checkpoints
+                .FirstOrDefaultAsync(c => c.EmployeeId == employeeId && c.CheckpointId == checkpointId);
 
-            if (activeCheckpoint == null)
+            if (checkpoint == null)
             {
-                throw new InvalidOperationException("Nincs aktív Belépési idő a munkavállalóhoz.");
+                throw new InvalidOperationException("Nincs ilyen checkpoint az adott munkavállalóhoz.");
             }
 
-            activeCheckpoint.CheckInTime = null;
-            activeCheckpoint.CheckOutTime = null;
-            activeCheckpoint.SessionStatus = SessionStatus.Inactive;
-
+            _context.Checkpoints.Remove(checkpoint);
             await _context.SaveChangesAsync();
         }
         //Privát metódus a Status megadásához: Active/Inactive. Model-hez

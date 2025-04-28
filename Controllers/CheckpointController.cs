@@ -92,7 +92,7 @@ namespace worksystem.Controllers
             var checkpoint = await _checkpointService.GetCheckpointsByEmployeeId(employeeIdInt, DateTime.Now.Year, DateTime.Now.Month);
             var lastCheckpoint = checkpoint.OrderByDescending(c => c.CheckInTime).FirstOrDefault();
 
-            if (lastCheckpoint == null || lastCheckpoint.CheckOutTime != null)
+            if (lastCheckpoint == null || lastCheckpoint.CheckOutTime != null || lastCheckpoint.CheckInTime == null)
             {
                 return BadRequest("Nincs aktív munkafolyamat.");
             }
@@ -104,7 +104,7 @@ namespace worksystem.Controllers
                 SessionStatus = SessionStatus.Inactive
             };
 
-            await _checkpointService.UpdateCheckpoint(employeeIdInt, updateDto);
+            await _checkpointService.UpdateCheckpoint(employeeIdInt, lastCheckpoint.CheckpointId, updateDto);
 
             return Ok(new 
             { 
