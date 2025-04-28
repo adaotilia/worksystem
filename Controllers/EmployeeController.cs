@@ -84,12 +84,15 @@ namespace worksystem.Controllers
             }
         }
         //Monthlyreport endpoints
-        [HttpGet("monthlyreports/me")]
-        public async Task<IActionResult> GetMonthlyReportsByEmployeeId()
+        [HttpGet("monthlyreports/me/bydate")]
+        public async Task<IActionResult> GetMonthlyReportByEmployeeIdAndDate([FromQuery] int year, [FromQuery] int month)
         {
-            var employeeId = GetEmployeeIdFromToken(); 
+            var employeeId = GetEmployeeIdFromToken();
             var reports = await _monthlyreportService.GetMonthlyreportsByEmployeeId(employeeId);
-            return Ok(reports);
+            var report = reports.FirstOrDefault(r => r.ReportMonth.Year == year && r.ReportMonth.Month == month);
+            if (report == null)
+                return NotFound($"Nincs jelentés erre az évre és hónapra: {year}-{month}");
+            return Ok(report);
         }
         //Schedule endpoints
         [HttpGet("schedules/{year}/{month}")]

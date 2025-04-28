@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using worksystem.DTOs;
 using worksystem.Models;
@@ -37,8 +37,7 @@ namespace worksystem.Services
                 EmployeeId = report.EmployeeId,
                 FullName = report.Employee.FullName,
                 ReportMonth = report.ReportMonth,
-                CheckInTime = null,
-                CheckOutTime = null,
+                Date = report.Date,
                 WorkHours = report.WorkHours,
                 OvertimeHours = report.OvertimeHours,
                 MonthlyWorkDays = report.MonthlyWorkDays,
@@ -72,8 +71,7 @@ namespace worksystem.Services
                 EmployeeId = report.EmployeeId,
                 FullName = report.Employee.FullName,
                 ReportMonth = report.ReportMonth,
-                CheckInTime = null,
-                CheckOutTime = null,
+                Date = report.Date,
                 WorkHours = report.WorkHours,
                 OvertimeHours = report.OvertimeHours,
                 MonthlyWorkDays = report.MonthlyWorkDays,
