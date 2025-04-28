@@ -65,8 +65,19 @@ namespace worksystem.Controllers
         [HttpPut("checkpoints/{employeeId}/{checkpointId}")]
         public async Task<IActionResult> UpdateCheckpoint(int employeeId, int checkpointId, [FromBody] CheckpointDTO checkpoint)
         {
-            var updatedCheckpoint = await _checkpointService.UpdateCheckpoint(employeeId, checkpointId, checkpoint);
-            return Ok(updatedCheckpoint);
+            try
+            {
+                var updatedCheckpoint = await _checkpointService.UpdateCheckpoint(employeeId, checkpointId, checkpoint);
+                return Ok(updatedCheckpoint);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
 
         [HttpDelete("checkpoints/{employeeId}/{checkpointId}")]
@@ -130,15 +141,37 @@ namespace worksystem.Controllers
         [HttpPut("employees/{employeeId}/fullname")]
         public async Task<IActionResult> UpdateFullName(int employeeId, [FromBody] EmployeeDTO employee)
         {
-            var updatedEmployee = await _employeeService.UpdateFullNameByEmployeeId(employeeId, employee);
-            return Ok(updatedEmployee);
+            try
+            {
+                var updatedEmployee = await _employeeService.UpdateFullNameByEmployeeId(employeeId, employee);
+                return Ok(updatedEmployee);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
 
         [HttpPut("employees/{employeeId}/username")]
         public async Task<IActionResult> UpdateUsername(int employeeId, [FromBody] EmployeeDTO employee)
         {
-            var updatedEmployee = await _employeeService.UpdateUsernameByEmployeeId(employeeId, employee);
-            return Ok(updatedEmployee);
+            try
+            {
+                var updatedEmployee = await _employeeService.UpdateUsernameByEmployeeId(employeeId, employee);
+                return Ok(updatedEmployee);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
 
         [HttpPut("employees/{employeeId}/password")]
@@ -162,9 +195,20 @@ namespace worksystem.Controllers
         [HttpPut("employees/{employeeId}/role")]
         public async Task<IActionResult> UpdateUserRole(int employeeId, [FromBody] UserRole role)
         {
-            var employee = await _employeeService.GetEmployeeById(employeeId);
-            employee.UserRole = role;
-            return Ok(await _employeeService.UpdateUserRoleByEmployeeId(employeeId, employee));
+            try
+            {
+                var employee = await _employeeService.GetEmployeeById(employeeId);
+                employee.UserRole = role;
+                return Ok(await _employeeService.UpdateUserRoleByEmployeeId(employeeId, employee));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
 
         [HttpDelete("employees/{employeeId}")]
@@ -226,9 +270,20 @@ namespace worksystem.Controllers
         [HttpPut("schedules/employee/{employeeId}/{year}/{month}")]
         public async Task<IActionResult> UpdateSchedule(int employeeId, int year, int month, [FromBody] ScheduleDTO schedule)
         {
-            var date = new DateOnly(year, month, 1);
-            var updatedSchedule = await _scheduleService.UpdateSchedule(employeeId, date, schedule);
-            return Ok(updatedSchedule);
+            try
+            {
+                var date = new DateOnly(year, month, 1);
+                var updatedSchedule = await _scheduleService.UpdateSchedule(employeeId, date, schedule);
+                return Ok(updatedSchedule);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
 
         [HttpDelete("schedules/employee/{employeeId}/{year}/{month}")]

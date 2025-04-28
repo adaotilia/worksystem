@@ -163,9 +163,20 @@ namespace worksystem.Controllers
         [HttpPut("schedules/employee/{employeeId}/{year}/{month}")]
         public async Task<IActionResult> UpdateSchedule(int employeeId, int year, int month, [FromBody] ScheduleDTO schedule)
         {
-            var date = new DateOnly(year, month, 1);
-            var updatedSchedule = await _scheduleService.UpdateSchedule(employeeId, date, schedule);
-            return Ok(updatedSchedule);
+            try
+            {
+                var date = new DateOnly(year, month, 1);
+                var updatedSchedule = await _scheduleService.UpdateSchedule(employeeId, date, schedule);
+                return Ok(updatedSchedule);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
 
         [HttpDelete("schedules/employee/{employeeId}/{year}/{month}")]
