@@ -89,10 +89,12 @@ namespace worksystem.Controllers
         {
             var employeeId = GetEmployeeIdFromToken();
             var reports = await _monthlyreportService.GetMonthlyreportsByEmployeeId(employeeId);
-            var report = reports.FirstOrDefault(r => r.ReportMonth.Year == year && r.ReportMonth.Month == month);
-            if (report == null)
+            var filteredReports = reports
+                .Where(r => r.ReportMonth.Year == year && r.ReportMonth.Month == month)
+                .ToList();
+            if (filteredReports == null || !filteredReports.Any())
                 return NotFound($"Nincs jelentés erre az évre és hónapra: {year}-{month}");
-            return Ok(report);
+            return Ok(filteredReports);
         }
         //Schedule endpoints
         [HttpGet("schedules/{year}/{month}")]
