@@ -112,8 +112,19 @@ namespace worksystem.Controllers
         [HttpPost("employees")]
         public async Task<IActionResult> CreateEmployee(EmployeeDTO employee)
         {
-            var createdEmployee = await _employeeService.CreateEmployee(employee);
-            return CreatedAtAction(nameof(GetEmployeeById), new { employeeId = createdEmployee.EmployeeId }, createdEmployee);
+            try
+            {
+                var createdEmployee = await _employeeService.CreateEmployee(employee);
+                return CreatedAtAction(nameof(GetEmployeeById), new { employeeId = createdEmployee.EmployeeId }, createdEmployee);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
 
         [HttpPut("employees/{employeeId}/fullname")]
@@ -133,8 +144,19 @@ namespace worksystem.Controllers
         [HttpPut("employees/{employeeId}/password")]
         public async Task<IActionResult> UpdatePassword(int employeeId, [FromBody] EmployeeDTO employee)
         {
-            var updatedEmployee = await _employeeService.UpdatePasswordByEmployeeId(employeeId, employee);
-            return Ok(updatedEmployee);
+            try
+            {
+                var updatedEmployee = await _employeeService.UpdatePasswordByEmployeeId(employeeId, employee);
+                return Ok(updatedEmployee);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
 
         [HttpPut("employees/{employeeId}/role")]

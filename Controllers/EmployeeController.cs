@@ -69,8 +69,19 @@ namespace worksystem.Controllers
         [HttpPut("employees/password")]
         public async Task<IActionResult> UpdatePassword([FromBody] PasswordDTO password)
         {
-            var employeeId = GetEmployeeIdFromToken();
-            return await _employeeService.UpdatePassword(password);
+            try
+            {
+                var employeeId = GetEmployeeIdFromToken();
+                return await _employeeService.UpdatePassword(password);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
         //Monthlyreport endpoints
         [HttpGet("monthlyreports/me")]

@@ -97,12 +97,23 @@ namespace worksystem.Controllers
        [HttpPut("employees/password")]
         public async Task<IActionResult> UpdateOwnPassword([FromBody] EmployeeDTO employee)
         {
-            var userIdString = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
-                return Unauthorized();
+            try
+            {
+                var userIdString = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
+                    return Unauthorized();
 
-            var updatedEmployee = await _employeeService.UpdatePasswordByEmployeeId(userId, employee);
-            return Ok(updatedEmployee);
+                var updatedEmployee = await _employeeService.UpdatePasswordByEmployeeId(userId, employee);
+                return Ok(updatedEmployee);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ismeretlen hiba történt." });
+            }
         }
         // Monthlyreport endpoints
         [HttpGet("monthlyreports/{year}/{month}")]
