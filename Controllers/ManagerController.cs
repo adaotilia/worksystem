@@ -94,17 +94,12 @@ namespace worksystem.Controllers
                 return NotFound();
             return Ok(employee);
         }
-       [HttpPut("employees/password")]
-        public async Task<IActionResult> UpdateOwnPassword([FromBody] EmployeeDTO employee)
+        [HttpPut("employees/password")]
+        public async Task<IActionResult> ChangePassword([FromBody] PasswordDTO passwordDto)
         {
             try
             {
-                var userIdString = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
-                    return Unauthorized();
-
-                var updatedEmployee = await _employeeService.UpdatePasswordByEmployeeId(userId, employee);
-                return Ok(updatedEmployee);
+                return await _employeeService.UpdatePassword(passwordDto);
             }
             catch (ArgumentException ex)
             {
